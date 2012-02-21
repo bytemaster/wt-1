@@ -63,15 +63,12 @@ private:
     Wt::Auth::User user = database_.findUser(app->sessionId(), users_);
     if (user.isValid())
       login_.login(user);
-
-    app->triggerUpdate();
-    app->enableUpdates(false);
   }
 };
 
 QRAuthService::QRAuthService(const Wt::Auth::AuthService& baseAuth)
   : baseAuth_(baseAuth),
-    redirectInternalPath_("/auth/qr/")
+    redirectParameter_("qr")
 { }
 
 std::string QRAuthService::createQRToken(QRTokenDatabase& database,
@@ -89,10 +86,12 @@ std::string QRAuthService::createQRToken(QRTokenDatabase& database,
   return token;
 }
 
-std::string QRAuthService::parseQRToken(const std::string& internalPath) const
+std::string QRAuthService::parseQRToken(const Wt::WEnvironment& env) const
 {
-  if (Wt::WApplication::pathMatches(internalPath, redirectInternalPath_))
-    return internalPath.substr(redirectInternalPath_.length());
+  const std::string *code = env.getParameter(redirectParameter_);
+
+  if (code)
+    return *code;
   else
     return std::string();
 }
