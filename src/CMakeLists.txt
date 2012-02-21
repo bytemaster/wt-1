@@ -90,6 +90,7 @@ Wt/WDate.C
 Wt/WDatePicker.C
 Wt/WDateTime.C
 Wt/WDateValidator.C
+Wt/WTimeValidator.C
 Wt/WDefaultLayout.C
 Wt/WDefaultLoadingIndicator.C
 Wt/WDialog.C
