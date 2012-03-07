@@ -1,18 +1,12 @@
 IF(ENABLE_SQLITE)
 
   OPTION(USE_SYSTEM_SQLITE3 "Use system-wide Sqlite3 instead of Wt's version" OFF)
-  OPTION(USE_SYSTEM_IBPP "Use a custom IBPP library instead of Wt's version" OFF)
 
   IF(USE_SYSTEM_SQLITE3)
     FIND_PACKAGE( Sqlite3 REQUIRED)
   ELSE(USE_SYSTEM_SQLITE3)
     SET(Sqlite3_SRCS amalgamation/sqlite3.c)
   ENDIF(USE_SYSTEM_SQLITE3)
-
-  IF(NOT USE_SYSTEM_IBPP)
-    SET(IBPP_SRC_DIRECTORY ibpp/)
-  ENDIF(NOT USE_SYSTEM_IBPP)
-  INCLUDE(../../../../cmake/WtFindFirebirdSql.txt)
 
   FIND_PACKAGE(Threads)
 
@@ -62,6 +56,15 @@ IF(ENABLE_SQLITE)
     DEBUG_POSTFIX ${DEBUG_LIB_POSTFIX}
     )
 
+  IF(MSVC)
+    SET_TARGET_PROPERTIES(
+      wtdbosqlite3
+    PROPERTIES
+      COMPILE_FLAGS "${BUILD_PARALLEL} /wd4251 /wd4275 /wd4267"
+    )
+
+  ENDIF(MSVC)
+
   INSTALL_FILES(/include/Wt/Dbo/backend "^Sqlite3$")
   INSTALL_FILES(/include/Wt/Dbo/backend "^.*Sqlite3.*h$")
 
@@ -103,6 +106,15 @@ ELSE(ENABLE_POSTGRES AND POSTGRES_FOUND)
 
 ENDIF(ENABLE_POSTGRES AND POSTGRES_FOUND)
 
+IF(ENABLE_FIREBIRD)
+  OPTION(USE_SYSTEM_IBPP "Use a custom IBPP library instead of Wt's version" OFF)
+
+  IF(NOT USE_SYSTEM_IBPP)
+    SET(IBPP_SRC_DIRECTORY ibpp/)
+  ENDIF(NOT USE_SYSTEM_IBPP)
+  INCLUDE(../../../../cmake/WtFindFirebirdSql.txt)
+ENDIF(ENABLE_FIREBIRD)
+
 IF(ENABLE_FIREBIRD AND FIREBIRD_FOUND)
 
   SET(HAVE_FIREBIRD true)
@@ -124,8 +136,19 @@ IF(ENABLE_FIREBIRD AND FIREBIRD_FOUND)
     Firebird.C
     ${IBPP_ALL_IN_ONE_FILE}
   )
-  TARGET_LINK_LIBRARIES(wtdbofirebird wtdbo ${FIREBIRD_LIBRARIES} ${BOOST_DT_LIB})
+  TARGET_LINK_LIBRARIES(wtdbofirebird
+    wtdbo
+    ${FIREBIRD_LIBRARIES}
+    ${BOOST_DT_LIB}
+  )
 
+  IF(MSVC)
+    SET_TARGET_PROPERTIES(
+      wtdbofirebird
+    PROPERTIES
+      COMPILE_FLAGS "${BUILD_PARALLEL} /wd4251 /wd4275 /wd4267"
+    )
+  ENDIF(MSVC)
 
   INSTALL(TARGETS wtdbofirebird
     RUNTIME DESTINATION bin
