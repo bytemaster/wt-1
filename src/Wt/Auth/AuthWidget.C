@@ -460,11 +460,15 @@ void AuthWidget::processEnvironment()
     if (handleRegistrationPath(env.internalPath()))
       return;
 
+  // Changed to instance()->internalPath()  from env.internalPath()instead of env.internalPath() 
+  // because env.internalPath() does not change after
+  // the error is posted and thus will pop up over and over again every time a new AuthWidget is created.
   std::string emailToken
-    = model_->baseAuth()->parseEmailToken(env.internalPath());
+    = model_->baseAuth()->parseEmailToken(WApplication::instance()->internalPath());
 
   if (!emailToken.empty()) {
     EmailTokenResult result = model_->processEmailToken(emailToken);
+    WApplication::instance()->setInternalPath("/");
     switch (result.result()) {
     case EmailTokenResult::Invalid:
       displayError(tr("Wt.Auth.error-invalid-token"));
