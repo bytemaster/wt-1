@@ -279,7 +279,7 @@ void AuthWidget::onLoginChange()
   } else {
     if (model_->baseAuth()->authTokensEnabled()) {
       WApplication::instance()->removeCookie
-	(model_->baseAuth()->authTokenCookieName());
+       (model_->baseAuth()->authTokenCookieName());
     }
 
     model_->reset();
@@ -468,7 +468,6 @@ void AuthWidget::processEnvironment()
 
   if (!emailToken.empty()) {
     EmailTokenResult result = model_->processEmailToken(emailToken);
-    WApplication::instance()->setInternalPath("/");
     switch (result.result()) {
     case EmailTokenResult::Invalid:
       displayError(tr("Wt.Auth.error-invalid-token"));
