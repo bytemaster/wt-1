@@ -176,6 +176,13 @@ public:
 
     return true;
   }
+  virtual bool clearEmail(const User& user) {
+    WithUser find(*this, user);
+
+    user_.modify()->setEmail("");
+
+    return true;
+  }
 
   virtual std::string email(const User& user) const {
     WithUser find(*this, user);
