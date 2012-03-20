@@ -38,6 +38,7 @@
 #include "CgiParser.h"
 #include "WebRequest.h"
 #include "WebUtils.h"
+#include "FileUtils.h"
 
 #include "Wt/WException"
 #include "Wt/WLogger"
@@ -244,6 +245,7 @@ void CgiParser::parse(WebRequest& request, ReadOption readOption)
       for (;len > 0;) {
 	::int64_t toRead = std::min(::int64_t(BUFSIZE), len);
 	request.in().read(buf_, toRead);
+	std::cerr << std::string(buf_, request.in().gcount()) << std::endl;
 	if (request.in().gcount() != (::int64_t)toRead)
 	  throw WException("CgiParser: short read");
 	len -= toRead;
@@ -267,7 +269,9 @@ void CgiParser::readMultipartData(WebRequest& request,
   spoolStream_ = 0;
   currentKey_.clear();
 
-  parseBody(request, boundary);
+  if (!parseBody(request, boundary))
+    return;
+
   for (;;) {
     if (!parseHead(request))
       break;
@@ -394,7 +398,7 @@ bool CgiParser::parseHead(WebRequest& request)
        * It is not easy to create a std::ostream pointing to a
        * temporary file name.
        */
-      std::string spool = Utils::createTempFileName();
+      std::string spool = FileUtils::createTempFileName();
 
       spoolStream_ = new std::ofstream(spool.c_str(),
         std::ios::out | std::ios::binary);
